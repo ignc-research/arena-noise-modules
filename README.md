@@ -1,6 +1,56 @@
 # Arena-Noise Modules
 This repository contains noise modules for the arena-rosnav 2D simulation environment.
 
+# SSRR21 information
+We propose different noise and latency modules for the 2D simulation environment [arena-rosnav](https://github.com/ignc-research/arena-rosnav).
+Therefore, we renamed the original "scan" topic to "scan_original" topic and added a new node "scan_process " 
+to receive the information from "scan_original". Subsequently, we process the sensor information in the new node 
+to increase the noise and latency. Finally,the processed sensor information is broadcasted with the "scan" topic.  
+No additional files need to be changed to accommodate the noise and delay modules.
+
+## How to use
+
+#### Mode for noise modules
+- The first noise mode is the gaussian noise.It is a noise that fits a Gaussian normal distribution.
+- The second noise mode is the offset noise.It simulate by Random Walk errors.
+- The third noise mode is the angle noise. It simulate angular errors, which are made up of mechanical horizontal and vertical errors.
+- The fourth noise mode is bias noise. It simulate Physical offsets.
+
+#### Mode for delay module
+- Adding fixed time delays to sensor information.
+
+###3.2 Parameters for noise module
+
+```bash
+    "max_value_of_data": Maximum value of sensor information
+    "gauss_mean": Mean value of Gaussian noise
+    "gauss_sigma": Standard deviation range of Gaussian noise
+    "gauss_size": Size of gauss error
+    "bias_noise": Size of bias error
+    "offset_noise": Mean value of random error
+    "angle_noise": Angular error in radians.(mrad)
+```
+The parameters can be modified in the noise_parameter.json file
+
+###3.3 Start-up commands for noise and delay modules
+- In one terminal, start simulation. You can specify the following parameters: 
+
+   * noise_mode:=<0,1,2,3,4>(default 0,means without noise) #Different noises can be selected individually or together.eg.noise_mode:=123 It means that noise mode123 is added at the same time.
+   * delay:=<int> (default 0) # Delay time
+
+```bash
+roslaunch arena_bringup start_arena_flatland.launch train_mode:=false use_viz:=true local_planner:=mpc map_file:=map1 obs_vel:=0.3 noise_mode := 1 delay:= 10
+```
+
+## 4.Location of function and how to merge.
+- The functions are implemented in the realistic_modeling/scan_process folder.  
+- Changed parameters and started newly added sublaunch in start_arena_flatland.launch.  
+- Started new nodes and topics in scan_process.launch.
+- Rename the original topic name in flatland_simulator.launch.
+
+The noise and delay modules can be added to any version of the program by simply making changes to the above sections.
+
+# Arena-Rosnav (see [main repo](https://github.com/ignc-research/arena-rosnav) for more information)
 Arena-Rosnav is a flexible, high-performance 2D simulator with configurable agents, multiple sensors, and benchmark scenarios for testing robotic navigation. 
 
 Arena-Rosnav uses Flatland as the core simulator and is a modular high-level library for end-to-end experiments in embodied AI -- defining embodied AI tasks (e.g. navigation, obstacle avoidance, behavior cloning), training agents (via imitation or reinforcement learning, or no learning at all using conventional approaches like DWA, TEB or MPC), and benchmarking their performance on the defined tasks using standard metrics.
@@ -27,11 +77,6 @@ Train DRL agents on ROS compatible simulations for autonomous navigation in high
 * Testing a variety of planners (learning based and model based) within specific scenarios in test mode
 
 * Modular structure for extension of new functionalities and approaches
-
-
-### Recent Updates
-- 04.02.2021: Added Multiprocessing for training speedup
-- 26.01.2021: Added Scenario Tasks: generate your own scenario by specifying a scenario.json 
 
 
 ### Documentation & References
